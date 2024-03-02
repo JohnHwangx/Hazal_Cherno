@@ -5,3 +5,4 @@ bin-int
 *.sln
 *.vcxproj
 *.vcxproj.filters
+/Sandbox/*.ini
