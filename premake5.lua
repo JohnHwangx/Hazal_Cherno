@@ -69,18 +69,13 @@ project "Hazel"
     }
 
     filter "system:windows"
-        systemversion "10"
+        systemversion "latest"
 
         defines
         {
             "HZ_PLATFORM_WINDOWS",
             "HZ_BUILD_DLL",
             "GLFW_INCLUDE_NONE"
-        }
-
-        postbuildcommands
-        {
-            ("{COPY} %{cfg.buildtarget.relpath} \"../bin/" .. outputdir .. "/Sandbox/\"")
         }
 
     filter "configurations:Debug"
@@ -107,6 +102,7 @@ project "Sandbox"
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
     files
     {
         "%{prj.name}/src/**.h",
@@ -127,7 +123,7 @@ project "Sandbox"
     }
 
     filter "system:windows"
-        systemversion "10"
+        systemversion "latest"
 
         defines
         {

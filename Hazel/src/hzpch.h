@@ -12,7 +12,9 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#ifdef HZ_PALTFORM_WINDOWS
+#include "Hazel/Log.h"
+
+#ifdef HZ_PLATFORM_WINDOWS
 	#include <Windows.h>
 #endif // HZ_PALTFORM_WINDOWS
 
