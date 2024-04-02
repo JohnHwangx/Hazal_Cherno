@@ -12,27 +12,6 @@ namespace Hazel {
 
 	Application* Application::s_Instance = nullptr;
 
-	static GLenum ShaderDataTypeToOpenGLBaseType(ShaderDataType type)
-	{
-		switch (type)
-		{
-		case ShaderDataType::Float:		return GL_FLOAT;
-		case ShaderDataType::Float2:	return GL_FLOAT;
-		case ShaderDataType::Float3:	return GL_FLOAT;
-		case ShaderDataType::Float4:	return GL_FLOAT;
-		case ShaderDataType::Mat3:		return GL_FLOAT;
-		case ShaderDataType::Mat4:		return GL_FLOAT;
-		case ShaderDataType::Int:		return GL_INT;
-		case ShaderDataType::Int2:		return GL_INT;
-		case ShaderDataType::Int3:		return GL_INT;
-		case ShaderDataType::Int4:		return GL_INT;
-		case ShaderDataType::Bool:		return GL_BOOL;
-		}
-
-		HZ_CORE_ASSERT(false, "Unknown ShaderDataType!");
-		return 0;
-	}
-
 	Application::Application()
 	{
 		HZ_CORE_ASSERT(!s_Instance, "Application already exists!");
@@ -53,35 +32,22 @@ namespace Hazel {
 		};
 		unsigned int indices[3] = { 0, 1, 2 }; // 索引数据
 		// 0.生成顶点数组对象VAO
-		glGenVertexArrays(1, &m_VertexArray);
-		// 1. 绑定顶点数组对象
-		glBindVertexArray(m_VertexArray);
-		// 2.1顶点缓冲
+		m_VertexArray.reset(VertexArray::Create());
+		// 2.顶点缓冲
 		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
-		// 2.2 设定顶点属性指针，来解释顶点缓冲中的顶点属性布局/
-		{
-			BufferLayout layout = {
-				{ShaderDataType::Float3, "a_Position"},
-				{ShaderDataType::Float4, "a_Color"}
-			};
-			m_VertexBuffer->SetLayout(layout);
-		}
-
-		uint32_t index = 0;
-		const auto& layout = m_VertexBuffer->GetLayout();
-		for (const auto& element : layout)
-		{
-			glEnableVertexAttribArray(index);
-			glVertexAttribPointer(index,
-				element.GetComponenetCount(),
-				ShaderDataTypeToOpenGLBaseType(element.Type),
-				element.Normalized ? GL_TRUE : GL_FALSE,
-				layout.GetStride(),
-				(const void*)element.Offset);
-			index++;
-		}
-		// 3.索引缓冲
+		// 设定顶点属性指针，来解释顶点缓冲中的顶点属性布局
+		BufferLayout layout = {
+			{ShaderDataType::Float3, "a_Position"},
+			{ShaderDataType::Float4, "a_Color"}
+		};
+		// 3.先设置顶点缓冲布局-计算好各个属性的所需的值
+		m_VertexBuffer->SetLayout(layout);
+		// 4.再给顶点数组添加顶点缓冲-设置各个属性的顶点属性指针
+		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+		// 5.索引缓冲
 		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		// 6.给顶点数组设置索引缓冲
+		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
 
 		// 着色器代码
 		std::string vertexSrc = R"(
@@ -151,7 +117,7 @@ namespace Hazel {
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			m_Shader->Bind();
-			glBindVertexArray(m_VertexArray);
+			m_VertexArray->Bind();
 			glDrawElements(GL_TRIANGLES, 3, GL_UNSIGNED_INT, nullptr);
 
 			for (Layer* layer : m_LayerStack)

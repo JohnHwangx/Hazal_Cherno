@@ -72,6 +72,7 @@ namespace Hazel {
 		}
 
 		inline uint32_t GetStride() const { return m_Stride; }
+		inline const std::vector<BufferElement>& GetElements() const { return m_Elements; }
 
 		// 写vector的begin与end，以便循环BufferLayout类 for (const auto& element : BufferLayout)
 		std::vector<BufferElement>::iterator begin() { return m_Elements.begin(); }
