@@ -34,20 +34,22 @@ namespace Hazel {
 		// 0.生成顶点数组对象VAO
 		m_VertexArray.reset(VertexArray::Create());
 		// 2.顶点缓冲
-		m_VertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
+		std::shared_ptr<VertexBuffer> vertexBuffer;
+		vertexBuffer.reset(VertexBuffer::Create(vertices, sizeof(vertices)));
 		// 设定顶点属性指针，来解释顶点缓冲中的顶点属性布局
 		BufferLayout layout = {
 			{ShaderDataType::Float3, "a_Position"},
 			{ShaderDataType::Float4, "a_Color"}
 		};
 		// 3.先设置顶点缓冲布局-计算好各个属性的所需的值
-		m_VertexBuffer->SetLayout(layout);
+		vertexBuffer->SetLayout(layout);
 		// 4.再给顶点数组添加顶点缓冲-设置各个属性的顶点属性指针
-		m_VertexArray->AddVertexBuffer(m_VertexBuffer);
+		m_VertexArray->AddVertexBuffer(vertexBuffer);
 		// 5.索引缓冲
-		m_IndexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
+		std::shared_ptr<IndexBuffer> indexBuffer;
+		indexBuffer.reset(IndexBuffer::Create(indices, sizeof(indices) / sizeof(uint32_t)));
 		// 6.给顶点数组设置索引缓冲
-		m_VertexArray->SetIndexBuffer(m_IndexBuffer);
+		m_VertexArray->SetIndexBuffer(indexBuffer);
 
 		// 着色器代码
 		std::string vertexSrc = R"(
